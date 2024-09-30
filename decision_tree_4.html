@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazon Membership Decision Tree</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .question {
+            margin-top: 30px;
+            font-size: 1.2em;
+            position: relative;
+        }
+        button {
+            margin-right: 10px;
+            padding: 15px;
+            font-size: 1em;
+            background-color: #0073e6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #005bb5;
+        }
+        button.selected {
+            background-color: #004080;
+        }
+        .intermediate-result {
+            background-color: #e0f7e0;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: inline-block;
+            width: 100%;
+            max-width: 100%;
+            font-size: 1em;
+            color: #0073e6;
+        }
+        .result {
+            margin-top: 30px;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: white;
+            background-color: #28a745;
+            padding: 20px;
+            border-radius: 5px;
+            display: none;
+        }
+        .answer-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Amazon Membership Decision Tree</h1>
+    
+    <div id="decision-tree">
+        <!-- First question -->
+        <div class="question" id="question1">
+            <p>Are you working, studying, or something else?</p>
+            <div class="answer-section">
+                <button onclick="nextQuestion(1, 'Studying', this)">Studying</button>
+                <button onclick="nextQuestion(1, 'Working', this)">Working</button>
+                <button onclick="nextQuestion(1, 'Something else', this)">Something else</button>
+            </div>
+        </div>
+
+        <!-- Second question -->
+        <div class="question" id="question2" style="display:none;">
+            <p>Sunday night: Pizza and a movie or cozy blanket and a nice book?</p>
+            <div class="answer-section">
+                <button onclick="nextQuestion(2, 'Pizza and a movie', this)">Pizza and a movie</button>
+                <button onclick="nextQuestion(2, 'Cozy blanket and a book', this)">Cozy blanket and a book</button>
+            </div>
+        </div>
+
+        <!-- Third question -->
+        <div class="question" id="question3" style="display:none;">
+            <p>Do you prefer a cheaper streaming option, or no ads when watching movies and shows?</p>
+            <div class="answer-section">
+                <button onclick="nextQuestion(3, 'Cheaper option', this)">Cheaper option</button>
+                <button onclick="nextQuestion(3, 'No ads', this)">No ads</button>
+            </div>
+        </div>
+
+        <!-- Fourth question -->
+        <div class="question" id="question4" style="display:none;">
+            <p>Do you prefer music over podcasts/audiobooks or reading?</p>
+            <div class="answer-section">
+                <button onclick="nextQuestion(4, 'Yes', this)">Yes</button>
+                <button onclick="nextQuestion(4, 'No', this)">No</button>
+            </div>
+        </div>
+
+        <!-- Fifth question -->
+        <div class="question" id="question5" style="display:none;">
+            <p>Would you rather have access to a limited range of books or unlimited access to a huge collection?</p>
+            <div class="answer-section">
+                <button onclick="nextQuestion(5, 'Limited range', this)">Limited range</button>
+                <button onclick="nextQuestion(5, 'Unlimited access', this)">Unlimited access</button>
+            </div>
+        </div>
+
+        <!-- Sixth question -->
+        <div class="question" id="question6" style="display:none;">
+            <p>Are you looking for premium access to all Amazon services?</p>
+            <div class="answer-section">
+                <button onclick="nextQuestion(6, 'Yes', this)">Yes</button>
+                <button onclick="nextQuestion(6, 'No', this)">No</button>
+            </div>
+        </div>
+
+        <!-- Final result -->
+        <div class="result" id="finalResult"></div>
+    </div>
+
+    <script>
+        // Store user answers
+        let answers = {};
+
+        function nextQuestion(step, answer, element) {
+            // Toggle selection/deselection
+            if (element.classList.contains('selected')) {
+                element.classList.remove('selected');
+                answers[step] = null; // Deselect the answer
+                removeIntermediateResult(element);
+                return;
+            }
+
+            // Deselect all buttons in this question
+            let buttons = element.parentElement.querySelectorAll('button');
+            buttons.forEach(btn => btn.classList.remove('selected'));
+
+            // Mark this button as selected
+            element.classList.add('selected');
+
+            // Store the answer
+            answers[step] = answer;
+
+            // Remove any previous intermediate result
+            removeIntermediateResult(element);
+
+            // Create and display the intermediate result
+            let resultSpan = document.createElement('div');
+            resultSpan.className = 'intermediate-result';
+            resultSpan.innerHTML = getIntermediateResult(step, answer);
+            element.parentElement.parentElement.appendChild(resultSpan);
+
+            // Show the next question or final result
+            if (step === 6) {
+                showFinalResult();
+            } else {
+                showNextQuestion(step + 1);
+            }
+        }
+
+        function removeIntermediateResult(element) {
+            let resultSpan = element.parentElement.parentElement.querySelector('.intermediate-result');
+            if (resultSpan) {
+                resultSpan.remove();
+            }
+        }
+
+        function getIntermediateResult(step, answer) {
+            switch (step) {
+                case 1:
+                    return answer === 'Studying' 
+                        ? 'Amazon Prime Student offers discounted rates with benefits similar to Prime.'
+                        : 'Amazon Prime might be a suitable fit.';
+                case 2:
+                    return answer === 'Pizza and a movie' 
+                        ? 'You might enjoy Prime Video for streaming.'
+                        : "Let’s explore book options like Kindle Unlimited or Prime Reading.";
+                case 3:
+                    return answer === 'Cheaper option' 
+                        ? 'Prime Video is a good choice for streaming without ads at a lower cost.'
+                        : 'Prime Video (No Ads) is the perfect fit if you prefer an ad-free experience.';
+                case 4:
+                    return answer === 'Yes' 
+                        ? 'You might enjoy Amazon Music.'
+                        : 'You may prefer reading or audiobooks services.';
+                case 5:
+                    return answer === 'Limited range' 
+                        ? 'Prime Reading (included with Prime) provides access to a limited collection.'
+                        : 'Kindle Unlimited is the best choice for you with access to a huge range of books.';
+                case 6:
+                    return answer === 'Yes' 
+                        ? 'Amazon+ is the ideal option, combining all Amazon services in one comprehensive membership.'
+                        : 'One of the individual memberships (Prime, Prime Video, Amazon Music, Kindle Unlimited) should suit your needs.';
+            }
+        }
+
+        function showNextQuestion(questionNumber) {
+            document.getElementById('question' + questionNumber).style.display = 'block';
+        }
+
+        function showFinalResult() {
+            let questions = document.querySelectorAll('.question');
+            questions.forEach(question => question.style.display = 'none');
+
+            let resultDiv = document.getElementById('finalResult');
+            resultDiv.style.display = 'block';
+
+            // Determine the overall most suitable subscription based on user answers
+            let score = {
+                'Prime Student': 0,
+                'Prime Video': 0,
+                'Prime Video (No Ads)': 0,
+                'Amazon Music': 0,
+                'Prime Reading': 0,
+                'Kindle Unlimited': 0,
+                'Amazon+': 0
+            };
+
+            // Assign points based on answers
+            if (answers[1] === 'Studying') score['Prime Student']++;
+            if (answers[2] === 'Pizza and a movie') score['Prime Video']++;
+            if (answers[3] === 'No ads') score['Prime Video (No Ads)']++;
+            if (answers[4] === 'Yes') score['Amazon Music']++;
+            if (answers[5] === 'Limited range') score['Prime Reading']++;
+            if (answers[5] === 'Unlimited access') score['Kindle Unlimited']++;
+            if (answers[6] === 'Yes') score['Amazon+'] += 3; // Amazon+ gets more weight
+
+            // If Prime Reading is suitable, recommend Amazon Prime
+            if (score['Prime Reading'] > 0) {
+                score['Prime Reading'] = 0; // Remove extra weight for Prime Reading
+                score['Prime Student']++;
+                score['Prime Video']++;
+            }
+
+            // If Prime Student is selected, no need to suggest Prime Video or Amazon Music separately
+            if (score['Prime Student'] > 0) {
+                score['Prime Video'] = 0;
+                score['Amazon Music'] = 0;
+            }
+
+            // Determine the best recommendation
+            let maxScore = Math.max(...Object.values(score));
+            let recommended = Object.keys(score).filter(key => score[key] === maxScore);
+
+            // Display final recommendation
+            if (recommended.includes('Prime Reading')) {
+                resultDiv.innerHTML = `<p>Your most suitable Amazon membership option is: Amazon Prime, as Prime Reading is included in it.</p>`;
+            } else if (recommended.includes('Prime Student')) {
+                resultDiv.innerHTML = `<p>Your most suitable Amazon membership option is: Amazon Prime Student, which includes Prime Video and Amazon Music.</p>`;
+            } else if (recommended.length === 1) {
+                resultDiv.innerHTML = `<p>Your most suitable Amazon membership option is: ${recommended[0]}.</p>`;
+            } else {
+                resultDiv.innerHTML = `<p>Based on your preferences, multiple options might be suitable: ${recommended.join(', ')}.</p>`;
+            }
+        }
+    </script>
+
+</body>
+</html>
